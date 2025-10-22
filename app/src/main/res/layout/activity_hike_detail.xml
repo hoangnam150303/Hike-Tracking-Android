@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 🖼 Ảnh hike -->
+
         <ImageView
             android:id="@+id/ivHikeImage"
             android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:background="@android:color/darker_gray"
             android:contentDescription="Hike image" />
 
-        <!-- 📍 Thông tin -->
+
         <TextView
             android:id="@+id/tvHikeName"
             android:layout_width="match_parent"
@@ -95,7 +95,7 @@
             android:textSize="15sp"
             android:layout_marginTop="8dp" />
 
-        <!-- 🧭 Nút hành động -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -126,7 +126,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- 🔹 Observation Section -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
             android:background="#F2F2F2"
             android:padding="8dp" />
 
-        <!-- 💬 Comment Section -->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -160,7 +160,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <!-- 📋 Danh sách comment -->
+
         <LinearLayout
             android:id="@+id/commentContainer"
             android:layout_width="match_parent"
@@ -169,7 +169,7 @@
             android:background="#F2F2F2"
             android:padding="8dp" />
 
-        <!-- ✏️ Khu nhập comment -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

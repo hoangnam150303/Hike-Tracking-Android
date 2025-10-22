@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 🔹 Tiêu đề -->
+
         <TextView
             android:id="@+id/pageTitle"
             android:layout_width="wrap_content"
@@ -22,7 +22,7 @@
             android:textColor="@android:color/black"
             android:layout_marginBottom="12dp" />
 
-        <!-- 🔍 Thanh tìm kiếm -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- 🧭 Bộ lọc -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -91,7 +91,7 @@
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
-        <!-- 💪 Difficulty Filters -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
             android:layout_marginBottom="16dp" />
 
 
-        <!-- 📋 Danh sách tất cả Hikes -->
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/allHikesRecycler"
             android:layout_width="match_parent"

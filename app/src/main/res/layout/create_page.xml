@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 🔹 Tiêu đề -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,7 +19,6 @@
             android:textColor="@android:color/black"
             android:layout_marginBottom="24dp" />
 
-        <!-- 1️⃣ Name of Hike -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +36,6 @@
             android:padding="10dp"
             android:inputType="textCapWords" />
 
-        <!-- 2️⃣ Location -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +54,6 @@
             android:padding="10dp"
             android:inputType="text" />
 
-        <!-- 3️⃣ Date of Hike -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -91,7 +87,6 @@
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
-        <!-- 4️⃣ Parking Available -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -121,7 +116,6 @@
                 android:layout_marginStart="24dp" />
         </RadioGroup>
 
-        <!-- 5️⃣ Length of Hike -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -140,7 +134,6 @@
             android:padding="10dp"
             android:inputType="numberDecimal" />
 
-        <!-- 6️⃣ Level of Difficulty -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -156,7 +149,6 @@
             android:layout_height="wrap_content"
             android:entries="@array/difficulty_levels" />
 
-        <!-- 7️⃣ Description -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -176,7 +168,6 @@
             android:background="@android:drawable/edit_text"
             android:padding="10dp" />
 
-        <!-- 8️⃣ Creative Field #1: Weather -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -192,7 +183,6 @@
             android:layout_height="wrap_content"
             android:entries="@array/weather_conditions" />
 
-        <!-- 9️⃣ Creative Field #2: Companions -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -211,7 +201,6 @@
             android:padding="10dp"
             android:inputType="textCapWords" />
 
-        <!-- 🔹 Check-in Photo -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -238,7 +227,6 @@
             android:backgroundTint="@android:color/black"
             android:textColor="@android:color/white" />
 
-        <!-- ✅ Submit -->
         <Button
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
@@ -249,7 +237,6 @@
             android:backgroundTint="@android:color/black"
             android:textColor="@android:color/white" />
 
-        <!-- 🔹 Back -->
         <TextView
             android:id="@+id/tvBackHome"
             android:layout_width="wrap_content"
