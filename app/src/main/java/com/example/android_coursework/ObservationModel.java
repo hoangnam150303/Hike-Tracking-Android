@@ -6,7 +6,7 @@ public class ObservationModel {
     private String observation;
     private String time;
     private String comment;
-
+    // create constructor
     public ObservationModel(int id, int hikeId, String observation, String time, String comment) {
         this.id = id;
         this.hikeId = hikeId;
@@ -15,6 +15,7 @@ public class ObservationModel {
         this.comment = comment;
     }
 
+    // get function
     public int getId() { return id; }
     public int getHikeId() { return hikeId; }
     public String getObservation() { return observation; }

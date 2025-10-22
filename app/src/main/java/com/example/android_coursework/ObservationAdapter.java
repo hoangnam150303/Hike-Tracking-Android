@@ -13,25 +13,27 @@ public class ObservationAdapter extends RecyclerView.Adapter<ObservationAdapter.
     private final List<ObservationModel> observations;
     private final OnObservationActionListener listener;
 
+    // when user click butotn edit or delete, it will call those function
     public interface OnObservationActionListener {
         void onEdit(ObservationModel obs);
         void onDelete(int obsId);
     }
-
+    // create constructor
     public ObservationAdapter(Context context, List<ObservationModel> observations, OnObservationActionListener listener) {
         this.context = context;
         this.observations = observations;
         this.listener = listener;
     }
 
+
     @NonNull
-    @Override
+    @Override // set data to layout
     public ObservationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_observation, parent, false);
         return new ObservationViewHolder(view);
     }
 
-    @Override
+    @Override // set data to item
     public void onBindViewHolder(@NonNull ObservationViewHolder holder, int position) {
         ObservationModel obs = observations.get(position);
         holder.tvObservation.setText(obs.getObservation());
@@ -41,12 +43,13 @@ public class ObservationAdapter extends RecyclerView.Adapter<ObservationAdapter.
         holder.btnEdit.setOnClickListener(v -> listener.onEdit(obs));
         holder.btnDelete.setOnClickListener(v -> listener.onDelete(obs.getId()));
     }
-
+    // get number item
     @Override
     public int getItemCount() {
         return observations.size();
     }
 
+    // each viewHolder is represent one item in list
     static class ObservationViewHolder extends RecyclerView.ViewHolder {
         TextView tvObservation, tvTime, tvComment;
         ImageButton btnEdit, btnDelete;

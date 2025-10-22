@@ -20,18 +20,16 @@ public class HikeDetailActivity extends AppCompatActivity {
     private int hikeId, authorId;
     private String imageUri;
     private DatabaseHelper dbHelper;
-
-    // 🧍 user hiện tại (giả lập, bạn sẽ lấy từ session/login thật sau)
-    private int userId;; // TODO: thay bằng id thật từ login/session
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hike_detail);
-
+        // connect database
         dbHelper = new DatabaseHelper(this);
 
-        // 🔹 Ánh xạ view
+        // mapping
         ivHikeImage = findViewById(R.id.ivHikeImage);
         tvHikeName = findViewById(R.id.tvHikeName);
         tvLocation = findViewById(R.id.tvLocation);
@@ -46,11 +44,11 @@ public class HikeDetailActivity extends AppCompatActivity {
         btnDelete = findViewById(R.id.btnDelete);
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
-        // 🧠 Nhận dữ liệu từ Intent
+        // get data from intent, where I config in HikeAdapter
         Intent intent = getIntent();
-        if (intent != null) {
+        if (intent != null) { // if intent is not null,set data
             hikeId = intent.getIntExtra("hike_id", -1);
-            authorId = intent.getIntExtra("author_id", -1); // 👈 id người tạo hike
+            authorId = intent.getIntExtra("author_id", -1);
             imageUri = intent.getStringExtra("image_uri");
             String name = intent.getStringExtra("hike_name");
             String location = intent.getStringExtra("location");
@@ -62,7 +60,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             String companions = intent.getStringExtra("companions");
             String description = intent.getStringExtra("description");
 
-            // 🖼 Hiển thị ảnh
+            // Display image
             if (imageUri != null && !imageUri.isEmpty()) {
                 Glide.with(this)
                         .load(Uri.parse(imageUri))
@@ -74,7 +72,7 @@ public class HikeDetailActivity extends AppCompatActivity {
                 ivHikeImage.setImageResource(R.drawable.hero1);
             }
 
-            // 📋 Hiển thị dữ liệu
+            // display data
             tvHikeName.setText(name);
             tvLocation.setText(location);
             tvDate.setText(date);
@@ -86,12 +84,12 @@ public class HikeDetailActivity extends AppCompatActivity {
             tvDescription.setText(description);
         }
 
-        // 🧩 Debug log để kiểm tra ID
+
         Log.d("DEBUG", "currentUserId=" + userId + ", authorId=" + authorId);
 
-        // 🩹 Nếu authorId chưa được truyền → lấy lại từ DB
+        // check author id and hikeId is exist
         if (authorId == -1 && hikeId != -1) {
-            Cursor cursor = dbHelper.getHikesByUser(hikeId);
+            Cursor cursor = dbHelper.getHikesByUser(hikeId); // create pointer object
             if (cursor != null && cursor.moveToFirst()) {
                 authorId = cursor.getInt(cursor.getColumnIndexOrThrow("user_id"));
                 cursor.close();
@@ -99,20 +97,20 @@ public class HikeDetailActivity extends AppCompatActivity {
             }
         }
 
-        // 🔒 Nếu user không phải tác giả → ẩn update/delete
-        if (userId != authorId) {  // ⚠️ khác nhau => ẩn
-            Log.d("DEBUG_AUTH", "❌ Không phải tác giả, ẩn nút. userId=" + userId + ", authorId=" + authorId);
+        // check if user is not authorId, disable edit button and delete button
+        if (userId != authorId) {
+            Log.d("DEBUG_AUTH", "Not Author. userId=" + userId + ", authorId=" + authorId);
             btnUpdate.setVisibility(View.GONE);
             btnDelete.setVisibility(View.GONE);
         } else {
-            Log.d("DEBUG_AUTH", "✅ Là tác giả, hiển thị nút. userId=" + userId + ", authorId=" + authorId);
+            Log.d("DEBUG_AUTH", "Is Author. userId=" + userId + ", authorId=" + authorId);
             btnUpdate.setVisibility(View.VISIBLE);
             btnDelete.setVisibility(View.VISIBLE);
         }
 
 
 
-        // ✏️ Update — truyền đầy đủ dữ liệu sang UpdateHikeActivity
+        // Update, send all data to update page
         btnUpdate.setOnClickListener(v -> {
             Intent updateIntent = new Intent(this, UpdateHikeActivity.class);
             updateIntent.putExtra("hike_id", hikeId);
@@ -129,30 +127,30 @@ public class HikeDetailActivity extends AppCompatActivity {
             startActivityForResult(updateIntent, 2001);
         });
 
-        // 🗑 Delete
+        // Delete
         btnDelete.setOnClickListener(v -> {
             boolean deleted = dbHelper.deleteHike(hikeId);
             if (deleted) {
-                Toast.makeText(this, "🗑 Deleted successfully!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Deleted successfully!", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             } else {
-                Toast.makeText(this, "❌ Failed to delete hike", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to delete hike", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 🧾 Hiển thị Observations và Comments
+        // Display Observations and Comments
         loadObservations();
         loadComments();
 
-        // 💬 Thêm comment mới
+        // add new comment
         EditText etComment = findViewById(R.id.etComment);
         Button btnSendComment = findViewById(R.id.btnSendComment);
 
         btnSendComment.setOnClickListener(v -> {
             String commentText = etComment.getText().toString().trim();
             if (commentText.isEmpty()) {
-                Toast.makeText(this, "⚠️ Please enter a comment!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enter a comment!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -160,16 +158,16 @@ public class HikeDetailActivity extends AppCompatActivity {
             long result = dbHelper.insertComment(hikeId, userId, commentText, time);
 
             if (result > 0) {
-                Toast.makeText(this, "✅ Comment added!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Comment added!", Toast.LENGTH_SHORT).show();
                 etComment.setText("");
                 loadComments(); // refresh
             } else {
-                Toast.makeText(this, "❌ Failed to add comment.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to add comment.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // ⚙️ Helper: Chuyển "4.5 km" → 4.5
+    // convert to double
     private double parseLength(String text) {
         try {
             return Double.parseDouble(text.replace(" km", "").trim());
@@ -178,21 +176,20 @@ public class HikeDetailActivity extends AppCompatActivity {
         }
     }
 
-    // 🧾 Load danh sách observation
-    // 🧾 Load danh sách observation (và cho phép update nếu là tác giả)
+    // Load list observation
     private void loadObservations() {
-        LinearLayout container = findViewById(R.id.observationContainer);
+        LinearLayout container = findViewById(R.id.observationContainer); // mapping
         container.removeAllViews();
         Cursor cursor = dbHelper.getObservationsByHike(hikeId);
 
-        if (cursor != null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) { // check data is null
             do {
                 int observationId = cursor.getInt(cursor.getColumnIndexOrThrow("observation_id"));
                 String observation = cursor.getString(cursor.getColumnIndexOrThrow("observation"));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow("time"));
                 String comment = cursor.getString(cursor.getColumnIndexOrThrow("comment"));
 
-                // 🧱 Layout cho từng Observation
+                // display layout of observation
                 LinearLayout observationLayout = new LinearLayout(this);
                 observationLayout.setOrientation(LinearLayout.VERTICAL);
                 observationLayout.setPadding(8, 8, 8, 8);
@@ -202,7 +199,7 @@ public class HikeDetailActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 ));
 
-                // 📄 Text hiển thị observation
+                // display text observation
                 TextView tvObs = new TextView(this);
                 tvObs.setText("• " + observation + " (" + time + ")\n💬 " + comment);
                 tvObs.setTextSize(15);
@@ -210,7 +207,7 @@ public class HikeDetailActivity extends AppCompatActivity {
 
                 observationLayout.addView(tvObs);
 
-                // 🔒 Nếu là tác giả → hiển thị nút Update và Delete
+                // if user author, edit observation
                 if (userId == authorId) {
                     LinearLayout btnLayout = new LinearLayout(this);
                     btnLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -229,19 +226,19 @@ public class HikeDetailActivity extends AppCompatActivity {
                     btnLayout.addView(btnDeleteObs);
                     observationLayout.addView(btnLayout);
 
-                    // 🧩 Xử lý Update (inline)
+                    // update button
                     btnEdit.setOnClickListener(v -> {
                         showUpdateObservationDialog(observationId, observation, comment);
                     });
 
-                    // ❌ Xử lý Delete
+                    // Delete button
                     btnDeleteObs.setOnClickListener(v -> {
                         boolean deleted = dbHelper.deleteObservation(observationId);
                         if (deleted) {
-                            Toast.makeText(this, "🗑 Observation deleted!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Observation deleted!", Toast.LENGTH_SHORT).show();
                             loadObservations();
                         } else {
-                            Toast.makeText(this, "❌ Failed to delete observation", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Failed to delete observation", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -255,7 +252,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             container.addView(none);
         }
     }
-    // 🧠 Hiển thị Dialog cho phép cập nhật Observation ngay tại trang Detail
+    // Display dialog to accept update observation in detail page
     private void showUpdateObservationDialog(int observationId, String oldObservation, String oldComment) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Update Observation");
@@ -282,16 +279,16 @@ public class HikeDetailActivity extends AppCompatActivity {
             String newTime = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
 
             if (newObs.isEmpty()) {
-                Toast.makeText(this, "⚠️ Observation cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "⚠Observation cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             boolean updated = dbHelper.updateObservation(observationId, newObs, newTime, newComment);
             if (updated) {
-                Toast.makeText(this, "✅ Observation updated!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Observation updated!", Toast.LENGTH_SHORT).show();
                 loadObservations();
             } else {
-                Toast.makeText(this, "❌ Update failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -300,8 +297,7 @@ public class HikeDetailActivity extends AppCompatActivity {
     }
 
 
-    // 💬 Load danh sách comment
-    // 💬 Load danh sách comment (cho phép update & delete nếu là người viết)
+    // Load list of comment
     private void loadComments() {
         LinearLayout commentContainer = findViewById(R.id.commentContainer);
         commentContainer.removeAllViews();
@@ -315,10 +311,10 @@ public class HikeDetailActivity extends AppCompatActivity {
                 String time = cursor.getString(cursor.getColumnIndexOrThrow("timestamp"));
                 String username = cursor.getString(cursor.getColumnIndexOrThrow("username"));
 
-                // ✅ Gắn tên người dùng
+                // set name of author
                 String displayName = (commentUserId == userId) ? "You" : (username != null ? username : "User " + commentUserId);
 
-                // 🧱 Layout chứa từng comment
+                // layout of each comment
                 LinearLayout commentLayout = new LinearLayout(this);
                 commentLayout.setOrientation(LinearLayout.VERTICAL);
                 commentLayout.setPadding(8, 8, 8, 8);
@@ -328,14 +324,14 @@ public class HikeDetailActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 ));
 
-                // 📄 Hiển thị nội dung comment
+                //Display content of comment
                 TextView tvComment = new TextView(this);
                 tvComment.setText("👤 " + displayName + ": " + comment + "\n🕒 " + time);
                 tvComment.setTextSize(15);
                 tvComment.setPadding(0, 8, 0, 8);
                 commentLayout.addView(tvComment);
 
-                // ✏️ Nếu là comment của mình → thêm nút Edit và Delete
+                // if author display Edit button and delete button
                 if (commentUserId == userId) {
                     LinearLayout btnLayout = new LinearLayout(this);
                     btnLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -354,17 +350,17 @@ public class HikeDetailActivity extends AppCompatActivity {
                     btnLayout.addView(btnDelete);
                     commentLayout.addView(btnLayout);
 
-                    // 🧩 Sự kiện Edit comment
+                    // Edit button event
                     btnEdit.setOnClickListener(v -> showUpdateCommentDialog(commentId, comment));
 
-                    // ❌ Sự kiện Delete comment
+                    // delete button event
                     btnDelete.setOnClickListener(v -> {
                         boolean deleted = dbHelper.deleteComment(commentId);
                         if (deleted) {
-                            Toast.makeText(this, "🗑 Comment deleted!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Comment deleted!", Toast.LENGTH_SHORT).show();
                             loadComments();
                         } else {
-                            Toast.makeText(this, "❌ Failed to delete comment.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -378,7 +374,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             commentContainer.addView(none);
         }
     }
-    // 🧠 Hiển thị dialog cho phép chỉnh sửa comment ngay trong trang detail
+    // Display dialog to accept edit comment in detail page
     private void showUpdateCommentDialog(int commentId, String oldComment) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Update Comment");
@@ -397,17 +393,17 @@ public class HikeDetailActivity extends AppCompatActivity {
         builder.setPositiveButton("Save", (dialog, which) -> {
             String newComment = etComment.getText().toString().trim();
             if (newComment.isEmpty()) {
-                Toast.makeText(this, "⚠️ Comment cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Comment cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String newTime = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
             boolean updated = dbHelper.updateComment(commentId, newComment, newTime);
             if (updated) {
-                Toast.makeText(this, "✅ Comment updated!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Comment updated!", Toast.LENGTH_SHORT).show();
                 loadComments();
             } else {
-                Toast.makeText(this, "❌ Update failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -416,12 +412,12 @@ public class HikeDetailActivity extends AppCompatActivity {
     }
 
 
-    // 🔄 Khi update hike xong
+    // After update success in UpdateActivity, user will return to HikeDetail
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 2001 && resultCode == RESULT_OK) {
-            Toast.makeText(this, "✅ Hike updated!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Hike updated!", Toast.LENGTH_SHORT).show();
             setResult(RESULT_OK);
             finish();
         }

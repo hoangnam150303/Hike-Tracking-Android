@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "Hiking.db";
-    public static final int DATABASE_VERSION = 4; // ⚙️ tăng version để onUpgrade chạy lại
+    public static final int DATABASE_VERSION = 4;
 
     // -------------------- USER TABLE -------------------- //
     public static final String TABLE_USER = "User";
@@ -193,7 +193,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.rawQuery("SELECT * FROM " + TABLE_HIKE, null);
     }
 
-    // ✅ Sửa lại để có cập nhật ảnh
+    // update hike
     public boolean updateHike(int id, String name, String location, String date, String parking,
                               double length, String difficulty, String description,
                               String weather, String companions, String photoUri) {
@@ -210,13 +210,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_COMPANIONS, companions);
         cv.put(COL_PHOTO_URI, photoUri);
 
-        Log.d("DB_UPDATE", "➡️ Updating Hike id=" + id + " with values: " + cv);
+        Log.d("DB_UPDATE", "Updating Hike id=" + id + " with values: " + cv);
 
         int rows = db.update(TABLE_HIKE, cv, COL_HIKE_ID + "=?", new String[]{String.valueOf(id)});
-        Log.d("DB_UPDATE", "🧾 Rows affected: " + rows);
+        Log.d("DB_UPDATE", "Rows affected: " + rows);
 
         if (rows == 0) {
-            Log.e("DB_UPDATE", "❌ Update failed — maybe hikeId is invalid or no matching row");
+            Log.e("DB_UPDATE", "Update failed — maybe hikeId is invalid or no matching row");
         }
 
         return rows > 0;

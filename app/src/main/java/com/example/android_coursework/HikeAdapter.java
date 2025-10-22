@@ -61,7 +61,7 @@ public class HikeAdapter extends RecyclerView.Adapter<HikeAdapter.HikeViewHolder
         holder.hikeTitle.setText(hike.getTitle());
         holder.hikeLength.setText(String.format("%.1f km", hike.getLength()));
 
-        // click card and paginate to detail item
+        // click card and paginate to detail item, put data into intent, it will use in other page
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, HikeDetailActivity.class);
 

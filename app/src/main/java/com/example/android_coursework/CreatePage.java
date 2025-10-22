@@ -53,35 +53,36 @@ public class CreatePage extends AppCompatActivity {
                         inputStream.close();
                         outputStream.close();
 
-                        // URI thật, trỏ vào file của app
+                        // real URI, point to file in app
                         imageUri = Uri.fromFile(file);
                         ivPhoto.setImageURI(imageUri);
-                        Log.d("CreatePage", "✅ Saved image locally: " + imageUri);
+                        Log.d("CreatePage", "Saved image locally: " + imageUri);
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(this, "❌ Failed to copy image", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Failed to copy image", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
 
 
-    // Mở thư viện ảnh (Storage Access Framework)
+    //open library, when click pick photo, application will open library image in device
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         pickImageLauncher.launch(intent);
     }
 
+    // create function
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_page);
-
+        // connect database
         dbHelper = new DatabaseHelper(this);
 
-        // 🧩 Ánh xạ view
+        // mapping
         etName = findViewById(R.id.etHikeName);
         etLocation = findViewById(R.id.etLocation);
         etLength = findViewById(R.id.etLength);
@@ -97,7 +98,7 @@ public class CreatePage extends AppCompatActivity {
         ivPhoto = findViewById(R.id.ivPhoto);
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
-        //  Chọn ngày
+        //  pick date
         btnPickDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             new DatePickerDialog(this, (view, y, m, d) -> {
@@ -109,10 +110,10 @@ public class CreatePage extends AppCompatActivity {
             ).show();
         });
 
-        // 🖼 Chọn ảnh
+        // pick photo
         btnPickPhoto.setOnClickListener(v -> openGallery());
 
-        //  Lưu hike
+        //  save hike
         btnSubmit.setOnClickListener(v -> saveHike());
     }
 
@@ -131,7 +132,7 @@ public class CreatePage extends AppCompatActivity {
                 ? ((RadioButton) findViewById(selectedParkingId)).getText().toString()
                 : "";
 
-        //  Kiểm tra dữ liệu
+        //  check data, if empty return
         if (name.isEmpty()) { etName.setError("Required"); return; }
         if (location.isEmpty()) { etLocation.setError("Required"); return; }
         if (date.equals("Not selected")) { Toast.makeText(this, "Pick a date", Toast.LENGTH_SHORT).show(); return; }
@@ -146,7 +147,7 @@ public class CreatePage extends AppCompatActivity {
             return;
         }
 
-        //  Thêm vào database
+        //  insert to database
         long result = dbHelper.insertHike(
                 name, location, date, parking, length,
                 difficulty, description, weather, companions,
@@ -164,7 +165,7 @@ public class CreatePage extends AppCompatActivity {
         }
     }
 
-    // Dọn form sau khi thêm
+    // clear form after create sucess
     private void clearForm() {
         etName.setText("");
         etLocation.setText("");
