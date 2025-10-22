@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 🖼 Hình ảnh -->
+        <ImageView
+            android:id="@+id/ivHikeImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:background="@android:color/darker_gray" />
+
+        <Button
+            android:id="@+id/btnChooseImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Image"
+            android:layout_marginTop="8dp" />
+
+        <!-- 🏔 Tên chuyến đi -->
+        <EditText
+            android:id="@+id/etTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Hike Name"
+            android:layout_marginTop="16dp" />
+
+        <!-- 📍 Địa điểm -->
+        <EditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:layout_marginTop="8dp" />
+
+        <!-- 📅 Ngày -->
+        <EditText
+            android:id="@+id/etDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date"
+            android:focusable="false"
+            android:layout_marginTop="8dp" />
+
+        <!-- 🚗 Parking -->
+        <EditText
+            android:id="@+id/etParking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Parking"
+            android:layout_marginTop="8dp" />
+
+        <!-- 📏 Chiều dài -->
+        <EditText
+            android:id="@+id/etLength"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Length (km)"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="8dp" />
+
+        <!-- 💪 Độ khó -->
+        <EditText
+            android:id="@+id/etDifficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Difficulty"
+            android:layout_marginTop="8dp" />
+
+        <!-- 🌦 Thời tiết -->
+        <EditText
+            android:id="@+id/etWeather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Weather"
+            android:layout_marginTop="8dp" />
+
+        <!-- 👥 Companions -->
+        <EditText
+            android:id="@+id/etCompanions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Companions"
+            android:layout_marginTop="8dp" />
+
+        <!-- 📝 Mô tả -->
+        <EditText
+            android:id="@+id/etDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description"
+            android:minHeight="80dp"
+            android:gravity="top"
+            android:layout_marginTop="8dp" />
+
+        <!-- 🔄 Nút cập nhật -->
+        <Button
+            android:id="@+id/btnUpdateHike"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Hike"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp" />
+
+        <!-- 🔍 Observation Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Observation"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp" />
+
+        <EditText
+            android:id="@+id/etObservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Observation details"
+            android:minHeight="80dp"
+            android:gravity="top"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Comment (optional)"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnAddObservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Observation"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="10dp" />
+
+    </LinearLayout>
+</ScrollView>
