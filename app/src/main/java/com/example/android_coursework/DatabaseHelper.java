@@ -222,6 +222,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
+    // Delete all hikes by user
+    public boolean deleteAllHikesByUser(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = db.delete(TABLE_HIKE, COL_AUTHOR_ID + "=?", new String[]{String.valueOf(userId)});
+        Log.d("DB_DELETE", "Deleted " + rows + " hikes for userId=" + userId);
+        return rows > 0;
+    }
 
     public boolean deleteHike(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -241,7 +248,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String likeKeyword = "%" + keyword + "%";
         return db.rawQuery(query, new String[]{likeKeyword, likeKeyword, likeKeyword});
     }
-
+    public Cursor getHikeById(int hikeId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_HIKE + " WHERE " + COL_HIKE_ID + "=?",
+                new String[]{String.valueOf(hikeId)});
+    }
     // -------------------- OBSERVATION CRUD -------------------- //
 
     public long insertObservation(int hikeId, String observation, String time, String comment) {

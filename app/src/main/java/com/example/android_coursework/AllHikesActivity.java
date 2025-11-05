@@ -1,5 +1,6 @@
 package com.example.android_coursework;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -27,11 +29,11 @@ public class AllHikesActivity extends AppCompatActivity {
     private List<HikeModel> hikeList;
     private Button btnFilterLength, btnFilterDate, btnFilterParking;
     private Spinner spFilterDifficulty;
-
+    private int userId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all_hikes);
+        setContentView(R.layout.actity_all_hike_users);
 
         dbHelper = new DatabaseHelper(this);
         allHikesRecycler = findViewById(R.id.allHikesRecycler);
@@ -48,7 +50,24 @@ public class AllHikesActivity extends AppCompatActivity {
         btnFilterDate = findViewById(R.id.btnFilterDate);
         btnFilterParking = findViewById(R.id.btnFilterParking);
         spFilterDifficulty = findViewById(R.id.spFilterDifficulty);
+        Button btnDeleteAll = findViewById(R.id.btnDeleteAll);
+        btnDeleteAll.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            int userId = prefs.getInt("user_id", -1);
 
+            if (userId == -1) {
+                Log.e("DELETE_ALL", "User not logged in");
+                return;
+            }
+
+            boolean deleted = dbHelper.deleteAllHikesByUser(userId);
+            if (deleted) {
+                Toast.makeText(this, "All hikes deleted!", Toast.LENGTH_SHORT).show();
+                loadAllHikes(); // reload empty list
+            } else {
+                Toast.makeText(this, "No hikes found to delete.", Toast.LENGTH_SHORT).show();
+            }
+        });
         // 🔎 Search
         btnSearch.setOnClickListener(v -> {
             String keyword = etSearch.getText().toString().trim();
@@ -150,8 +169,11 @@ public class AllHikesActivity extends AppCompatActivity {
 
     // 🧩 Load tất cả hikes
     private void loadAllHikes() {
+
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);
         hikeList.clear();
-        Cursor cursor = dbHelper.getAllHikes();
+        Cursor cursor = dbHelper.getHikesByUser(userId);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 hikeList.add(extractHikeFromCursor(cursor));

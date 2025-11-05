@@ -48,7 +48,7 @@ public class HikeDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) { // if intent is not null,set data
             hikeId = intent.getIntExtra("hike_id", -1);
-            authorId = intent.getIntExtra("author_id", -1);
+            authorId = intent.getIntExtra("user_id", -1);
             imageUri = intent.getStringExtra("image_uri");
             String name = intent.getStringExtra("hike_name");
             String location = intent.getStringExtra("location");
@@ -89,16 +89,19 @@ public class HikeDetailActivity extends AppCompatActivity {
 
         // check author id and hikeId is exist
         if (authorId == -1 && hikeId != -1) {
-            Cursor cursor = dbHelper.getHikesByUser(hikeId); // create pointer object
+            Cursor cursor = dbHelper.getHikeById(hikeId);
             if (cursor != null && cursor.moveToFirst()) {
                 authorId = cursor.getInt(cursor.getColumnIndexOrThrow("user_id"));
                 cursor.close();
                 Log.d("DEBUG", "authorId fetched from DB = " + authorId);
+            } else {
+                Log.d("DEBUG", "No hike found for hikeId=" + hikeId);
             }
         }
 
         // check if user is not authorId, disable edit button and delete button
         if (userId != authorId) {
+
             Log.d("DEBUG_AUTH", "Not Author. userId=" + userId + ", authorId=" + authorId);
             btnUpdate.setVisibility(View.GONE);
             btnDelete.setVisibility(View.GONE);

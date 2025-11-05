@@ -25,7 +25,6 @@ public class CreatePage extends AppCompatActivity {
     private TextView tvDate;
     private Button btnPickDate, btnPickPhoto, btnSubmit;
     private ImageView ivPhoto;
-
     private Uri imageUri = null;
     private DatabaseHelper dbHelper;
     private int userId;
@@ -96,6 +95,7 @@ public class CreatePage extends AppCompatActivity {
         btnPickPhoto = findViewById(R.id.btnPickPhoto);
         btnSubmit = findViewById(R.id.btnSubmit);
         ivPhoto = findViewById(R.id.ivPhoto);
+        TextView tvBackHome = findViewById(R.id.tvBackHome);
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
         //  pick date
@@ -109,7 +109,14 @@ public class CreatePage extends AppCompatActivity {
                     calendar.get(Calendar.DAY_OF_MONTH)
             ).show();
         });
+        // back to home page
+        tvBackHome.setOnClickListener(v -> {
 
+            Intent intent = new Intent(CreatePage.this, MainActivity.class);
+            startActivity(intent);
+
+            finish();
+        });
         // pick photo
         btnPickPhoto.setOnClickListener(v -> openGallery());
 

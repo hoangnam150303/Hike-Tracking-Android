@@ -16,7 +16,7 @@
             android:id="@+id/pageTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="All Hikes"
+            android:text="All User's Hikes"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -118,5 +118,13 @@
             app:spanCount="2"
             android:clipToPadding="false"
             android:paddingBottom="8dp" />
+        <Button
+            android:id="@+id/btnDeleteAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete All"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp" />
     </LinearLayout>
 </ScrollView>
