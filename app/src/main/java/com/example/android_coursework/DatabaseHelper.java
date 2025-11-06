@@ -248,6 +248,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String likeKeyword = "%" + keyword + "%";
         return db.rawQuery(query, new String[]{likeKeyword, likeKeyword, likeKeyword});
     }
+    public Cursor searchHikesByUser(String keyword, int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Log.d("DB_SEARCH_USER", "🔍 Query = " + userId);
+        String likeKeyword = "%" + keyword + "%";
+
+        String query = "SELECT * FROM " + TABLE_HIKE +
+                " WHERE (" + COL_HIKE_NAME + " LIKE ? " +
+                " OR " + COL_LOCATION + " LIKE ? " +
+                " OR " + COL_DIFFICULTY + " LIKE ?) " +
+                " AND " + COL_AUTHOR_ID + " = ? " +
+                " ORDER BY " + COL_DATE + " DESC";
+
+        // 🧩 Log truy vấn và tham số
+        Log.d("DB_SEARCH_USER", "🔍 Query = " + query);
+        Log.d("DB_SEARCH_USER", "🔍 Params = [" + likeKeyword + ", " + likeKeyword + ", " + likeKeyword + ", userId=" + userId + "]");
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                likeKeyword, likeKeyword, likeKeyword, String.valueOf(userId)
+        });
+
+        // 🧠 Log kết quả
+        if (cursor != null) {
+            Log.d("DB_SEARCH_USER", "✅ Rows found for userId=" + userId + " → " + cursor.getCount());
+        } else {
+            Log.e("DB_SEARCH_USER", "❌ Cursor is null for userId=" + userId);
+        }
+
+        return cursor;
+    }
+
+
+
     public Cursor getHikeById(int hikeId) {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_HIKE + " WHERE " + COL_HIKE_ID + "=?",

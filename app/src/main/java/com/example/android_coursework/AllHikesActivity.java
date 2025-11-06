@@ -30,6 +30,7 @@ public class AllHikesActivity extends AppCompatActivity {
     private Button btnFilterLength, btnFilterDate, btnFilterParking;
     private Spinner spFilterDifficulty;
     private int userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +44,12 @@ public class AllHikesActivity extends AppCompatActivity {
         adapter = new HikeAdapter(this, hikeList);
         allHikesRecycler.setAdapter(adapter);
 
-        // 🔍 Ánh xạ UI
+        // ✅ Get current userId
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);
+        Log.d("AllHikesActivity", "👤 Current userId = " + userId);
+
+        // 🔍 UI mapping
         EditText etSearch = findViewById(R.id.etSearch);
         Button btnSearch = findViewById(R.id.btnSearch);
         btnFilterLength = findViewById(R.id.btnFilterLength);
@@ -51,24 +57,24 @@ public class AllHikesActivity extends AppCompatActivity {
         btnFilterParking = findViewById(R.id.btnFilterParking);
         spFilterDifficulty = findViewById(R.id.spFilterDifficulty);
         Button btnDeleteAll = findViewById(R.id.btnDeleteAll);
-        btnDeleteAll.setOnClickListener(v -> {
-            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-            int userId = prefs.getInt("user_id", -1);
 
+        // 🗑 Delete all hikes for user
+        btnDeleteAll.setOnClickListener(v -> {
             if (userId == -1) {
-                Log.e("DELETE_ALL", "User not logged in");
+                Log.e("DELETE_ALL", "⚠️ User not logged in");
                 return;
             }
 
             boolean deleted = dbHelper.deleteAllHikesByUser(userId);
             if (deleted) {
                 Toast.makeText(this, "All hikes deleted!", Toast.LENGTH_SHORT).show();
-                loadAllHikes(); // reload empty list
+                loadAllHikes();
             } else {
                 Toast.makeText(this, "No hikes found to delete.", Toast.LENGTH_SHORT).show();
             }
         });
-        // 🔎 Search
+
+        // 🔎 Search hikes (theo user)
         btnSearch.setOnClickListener(v -> {
             String keyword = etSearch.getText().toString().trim();
             if (keyword.isEmpty()) loadAllHikes();
@@ -80,7 +86,7 @@ public class AllHikesActivity extends AppCompatActivity {
         btnFilterDate.setOnClickListener(v -> toggleFilter("date"));
         btnFilterParking.setOnClickListener(v -> toggleFilter("parking"));
 
-        // 💪 Spinner filter for Difficulty
+        // 💪 Spinner filter Difficulty (theo user)
         spFilterDifficulty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -91,12 +97,11 @@ public class AllHikesActivity extends AppCompatActivity {
                     filterBySingleDifficulty(selected);
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // 🔹 Load lần đầu
+        // 🔹 Load first
         loadAllHikes();
     }
 
@@ -106,21 +111,22 @@ public class AllHikesActivity extends AppCompatActivity {
         loadAllHikes();
     }
 
-    // 🔍 Search hikes
+    // 🔍 Search hikes theo user
     private void searchHikes(String keyword) {
         hikeList.clear();
-        Cursor cursor = dbHelper.searchHikes(keyword);
+        Cursor cursor = dbHelper.searchHikesByUser(keyword, userId);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 hikeList.add(extractHikeFromCursor(cursor));
             } while (cursor.moveToNext());
             cursor.close();
         }
+
         adapter.notifyDataSetChanged();
-        Log.d("AllHikesActivity", "🔎 Found hikes: " + hikeList.size());
+        Log.d("AllHikesActivity", "🔎 Found " + hikeList.size() + " hikes for userId=" + userId);
     }
 
-    // 📏 Sort functions
+    // 📏 Sort
     private void sortHikesByLength() {
         Collections.sort(hikeList, Comparator.comparingDouble(HikeModel::getLength));
         adapter.notifyDataSetChanged();
@@ -131,10 +137,10 @@ public class AllHikesActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // 🚗 Filter Parking = Yes
+    // 🚗 Filter Parking = Yes (theo user)
     private void filterByParking() {
         hikeList.clear();
-        Cursor cursor = dbHelper.getAllHikes();
+        Cursor cursor = dbHelper.getHikesByUser(userId);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 String parking = cursor.getString(cursor.getColumnIndexOrThrow("parking"));
@@ -145,14 +151,13 @@ public class AllHikesActivity extends AppCompatActivity {
             cursor.close();
         }
         adapter.notifyDataSetChanged();
-        Log.d("AllHikesActivity", "🚗 Filtered by parking (Yes): " + hikeList.size());
+        Log.d("AllHikesActivity", "🚗 Filtered by parking (Yes): " + hikeList.size() + " hikes for userId=" + userId);
     }
 
-    // 💪 Filter by Difficulty (single Spinner)
+    // 💪 Filter by Difficulty (theo user)
     private void filterBySingleDifficulty(String level) {
         hikeList.clear();
-        Cursor cursor = dbHelper.getAllHikes();
-
+        Cursor cursor = dbHelper.getHikesByUser(userId);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 String difficulty = cursor.getString(cursor.getColumnIndexOrThrow("difficulty"));
@@ -162,16 +167,12 @@ public class AllHikesActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
             cursor.close();
         }
-
         adapter.notifyDataSetChanged();
-        Log.d("AllHikesActivity", "💪 Filtered by difficulty: " + level + " → " + hikeList.size());
+        Log.d("AllHikesActivity", "💪 Filtered by difficulty (" + level + ") → " + hikeList.size());
     }
 
-    // 🧩 Load tất cả hikes
+    // 🧩 Load tất cả hikes của user
     private void loadAllHikes() {
-
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        userId = prefs.getInt("user_id", -1);
         hikeList.clear();
         Cursor cursor = dbHelper.getHikesByUser(userId);
         if (cursor != null && cursor.moveToFirst()) {
@@ -180,11 +181,12 @@ public class AllHikesActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
             cursor.close();
         }
+
         adapter.notifyDataSetChanged();
-        Log.d("AllHikesActivity", "📍 Reloaded hikes: " + hikeList.size());
+        Log.d("AllHikesActivity", "📍 Reloaded hikes for userId=" + userId + ": " + hikeList.size());
     }
 
-    // 🧱 Helper - trích dữ liệu từ cursor
+    // 🧱 Extract model
     private HikeModel extractHikeFromCursor(Cursor cursor) {
         return new HikeModel(
                 cursor.getInt(cursor.getColumnIndexOrThrow("hike_id")),
@@ -201,9 +203,8 @@ public class AllHikesActivity extends AppCompatActivity {
         );
     }
 
-    // ⚙️ Toggle filters + highlight button
+    // ⚙️ Toggle filter + highlight
     private void toggleFilter(String type) {
-        // Reset style
         resetButtonStyle(btnFilterLength, android.R.color.holo_green_dark, false);
         resetButtonStyle(btnFilterDate, android.R.color.holo_orange_dark, false);
         resetButtonStyle(btnFilterParking, android.R.color.holo_blue_dark, false);
@@ -213,12 +214,10 @@ public class AllHikesActivity extends AppCompatActivity {
                 sortHikesByLength();
                 resetButtonStyle(btnFilterLength, android.R.color.holo_green_light, true);
                 break;
-
             case "date":
                 sortHikesByDate();
                 resetButtonStyle(btnFilterDate, android.R.color.holo_orange_light, true);
                 break;
-
             case "parking":
                 filterByParking();
                 resetButtonStyle(btnFilterParking, android.R.color.holo_blue_light, true);
