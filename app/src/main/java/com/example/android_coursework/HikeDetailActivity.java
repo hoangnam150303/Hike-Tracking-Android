@@ -26,10 +26,8 @@ public class HikeDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hike_detail);
-        // connect database
         dbHelper = new DatabaseHelper(this);
 
-        // mapping
         ivHikeImage = findViewById(R.id.ivHikeImage);
         tvHikeName = findViewById(R.id.tvHikeName);
         tvLocation = findViewById(R.id.tvLocation);
@@ -42,11 +40,12 @@ public class HikeDetailActivity extends AppCompatActivity {
         tvDescription = findViewById(R.id.tvDescription);
         btnUpdate = findViewById(R.id.btnUpdate);
         btnDelete = findViewById(R.id.btnDelete);
+
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
-        // get data from intent, where I config in HikeAdapter
+
         Intent intent = getIntent();
-        if (intent != null) { // if intent is not null,set data
+        if (intent != null) {
             hikeId = intent.getIntExtra("hike_id", -1);
             authorId = intent.getIntExtra("user_id", -1);
             imageUri = intent.getStringExtra("image_uri");
@@ -60,7 +59,6 @@ public class HikeDetailActivity extends AppCompatActivity {
             String companions = intent.getStringExtra("companions");
             String description = intent.getStringExtra("description");
 
-            // Display image
             if (imageUri != null && !imageUri.isEmpty()) {
                 Glide.with(this)
                         .load(Uri.parse(imageUri))
@@ -72,7 +70,6 @@ public class HikeDetailActivity extends AppCompatActivity {
                 ivHikeImage.setImageResource(R.drawable.hero1);
             }
 
-            // display data
             tvHikeName.setText(name);
             tvLocation.setText(location);
             tvDate.setText(date);
@@ -84,10 +81,8 @@ public class HikeDetailActivity extends AppCompatActivity {
             tvDescription.setText(description);
         }
 
-
         Log.d("DEBUG", "currentUserId=" + userId + ", authorId=" + authorId);
 
-        // check author id and hikeId is exist
         if (authorId == -1 && hikeId != -1) {
             Cursor cursor = dbHelper.getHikeById(hikeId);
             if (cursor != null && cursor.moveToFirst()) {
@@ -99,9 +94,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             }
         }
 
-        // check if user is not authorId, disable edit button and delete button
         if (userId != authorId) {
-
             Log.d("DEBUG_AUTH", "Not Author. userId=" + userId + ", authorId=" + authorId);
             btnUpdate.setVisibility(View.GONE);
             btnDelete.setVisibility(View.GONE);
@@ -111,9 +104,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             btnDelete.setVisibility(View.VISIBLE);
         }
 
-
-
-        // Update, send all data to update page
+        // Update
         btnUpdate.setOnClickListener(v -> {
             Intent updateIntent = new Intent(this, UpdateHikeActivity.class);
             updateIntent.putExtra("hike_id", hikeId);
@@ -130,23 +121,24 @@ public class HikeDetailActivity extends AppCompatActivity {
             startActivityForResult(updateIntent, 2001);
         });
 
-        // Delete
-        btnDelete.setOnClickListener(v -> {
-            boolean deleted = dbHelper.deleteHike(hikeId);
-            if (deleted) {
-                Toast.makeText(this, "Deleted successfully!", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
-                finish();
-            } else {
-                Toast.makeText(this, "Failed to delete hike", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // ✅ DELETE with confirmation
+        btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog(
+                "Do you want to delete this hike?",
+                () -> {
+                    boolean deleted = dbHelper.deleteHike(hikeId);
+                    if (deleted) {
+                        Toast.makeText(this, "Deleted successfully!", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Failed to delete hike", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ));
 
-        // Display Observations and Comments
         loadObservations();
         loadComments();
 
-        // add new comment
         EditText etComment = findViewById(R.id.etComment);
         Button btnSendComment = findViewById(R.id.btnSendComment);
 
@@ -163,14 +155,13 @@ public class HikeDetailActivity extends AppCompatActivity {
             if (result > 0) {
                 Toast.makeText(this, "Comment added!", Toast.LENGTH_SHORT).show();
                 etComment.setText("");
-                loadComments(); // refresh
+                loadComments();
             } else {
                 Toast.makeText(this, "Failed to add comment.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // convert to double
     private double parseLength(String text) {
         try {
             return Double.parseDouble(text.replace(" km", "").trim());
@@ -179,38 +170,29 @@ public class HikeDetailActivity extends AppCompatActivity {
         }
     }
 
-    // Load list observation
     private void loadObservations() {
-        LinearLayout container = findViewById(R.id.observationContainer); // mapping
+        LinearLayout container = findViewById(R.id.observationContainer);
         container.removeAllViews();
         Cursor cursor = dbHelper.getObservationsByHike(hikeId);
 
-        if (cursor != null && cursor.moveToFirst()) { // check data is null
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 int observationId = cursor.getInt(cursor.getColumnIndexOrThrow("observation_id"));
                 String observation = cursor.getString(cursor.getColumnIndexOrThrow("observation"));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow("time"));
                 String comment = cursor.getString(cursor.getColumnIndexOrThrow("comment"));
 
-                // display layout of observation
                 LinearLayout observationLayout = new LinearLayout(this);
                 observationLayout.setOrientation(LinearLayout.VERTICAL);
                 observationLayout.setPadding(8, 8, 8, 8);
                 observationLayout.setBackgroundColor(0xFFF5F5F5);
-                observationLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                ));
 
-                // display text observation
                 TextView tvObs = new TextView(this);
                 tvObs.setText("• " + observation + " (" + time + ")\n💬 " + comment);
                 tvObs.setTextSize(15);
                 tvObs.setPadding(0, 8, 0, 8);
-
                 observationLayout.addView(tvObs);
 
-                // if user author, edit observation
                 if (userId == authorId) {
                     LinearLayout btnLayout = new LinearLayout(this);
                     btnLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -218,32 +200,30 @@ public class HikeDetailActivity extends AppCompatActivity {
                     Button btnEdit = new Button(this);
                     btnEdit.setText("✏️ Edit");
                     btnEdit.setTextSize(12);
-                    btnEdit.setPadding(10, 0, 10, 0);
 
                     Button btnDeleteObs = new Button(this);
                     btnDeleteObs.setText("🗑 Delete");
                     btnDeleteObs.setTextSize(12);
-                    btnDeleteObs.setPadding(10, 0, 10, 0);
 
                     btnLayout.addView(btnEdit);
                     btnLayout.addView(btnDeleteObs);
                     observationLayout.addView(btnLayout);
 
-                    // update button
-                    btnEdit.setOnClickListener(v -> {
-                        showUpdateObservationDialog(observationId, observation, comment);
-                    });
+                    btnEdit.setOnClickListener(v -> showUpdateObservationDialog(observationId, observation, comment));
 
-                    // Delete button
-                    btnDeleteObs.setOnClickListener(v -> {
-                        boolean deleted = dbHelper.deleteObservation(observationId);
-                        if (deleted) {
-                            Toast.makeText(this, "Observation deleted!", Toast.LENGTH_SHORT).show();
-                            loadObservations();
-                        } else {
-                            Toast.makeText(this, "Failed to delete observation", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    //  DELETE with confirmation
+                    btnDeleteObs.setOnClickListener(v -> showDeleteConfirmationDialog(
+                            "Do you want to delete this observation?",
+                            () -> {
+                                boolean deleted = dbHelper.deleteObservation(observationId);
+                                if (deleted) {
+                                    Toast.makeText(this, "Observation deleted!", Toast.LENGTH_SHORT).show();
+                                    loadObservations();
+                                } else {
+                                    Toast.makeText(this, "Failed to delete observation", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    ));
                 }
 
                 container.addView(observationLayout);
@@ -255,7 +235,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             container.addView(none);
         }
     }
-    // Display dialog to accept update observation in detail page
+
     private void showUpdateObservationDialog(int observationId, String oldObservation, String oldComment) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Update Observation");
@@ -282,7 +262,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             String newTime = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
 
             if (newObs.isEmpty()) {
-                Toast.makeText(this, "⚠Observation cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "⚠ Observation cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -299,8 +279,6 @@ public class HikeDetailActivity extends AppCompatActivity {
         builder.show();
     }
 
-
-    // Load list of comment
     private void loadComments() {
         LinearLayout commentContainer = findViewById(R.id.commentContainer);
         commentContainer.removeAllViews();
@@ -314,27 +292,19 @@ public class HikeDetailActivity extends AppCompatActivity {
                 String time = cursor.getString(cursor.getColumnIndexOrThrow("timestamp"));
                 String username = cursor.getString(cursor.getColumnIndexOrThrow("username"));
 
-                // set name of author
                 String displayName = (commentUserId == userId) ? "You" : (username != null ? username : "User " + commentUserId);
 
-                // layout of each comment
                 LinearLayout commentLayout = new LinearLayout(this);
                 commentLayout.setOrientation(LinearLayout.VERTICAL);
                 commentLayout.setPadding(8, 8, 8, 8);
                 commentLayout.setBackgroundColor(0xFFF5F5F5);
-                commentLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                ));
 
-                //Display content of comment
                 TextView tvComment = new TextView(this);
-                tvComment.setText("👤 " + displayName + ": " + comment + "\n🕒 " + time);
+                tvComment.setText(" " + displayName + ": " + comment + "\n🕒 " + time);
                 tvComment.setTextSize(15);
                 tvComment.setPadding(0, 8, 0, 8);
                 commentLayout.addView(tvComment);
 
-                // if author display Edit button and delete button
                 if (commentUserId == userId) {
                     LinearLayout btnLayout = new LinearLayout(this);
                     btnLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -342,30 +312,30 @@ public class HikeDetailActivity extends AppCompatActivity {
                     Button btnEdit = new Button(this);
                     btnEdit.setText("✏️ Edit");
                     btnEdit.setTextSize(12);
-                    btnEdit.setPadding(10, 0, 10, 0);
 
                     Button btnDelete = new Button(this);
                     btnDelete.setText("🗑 Delete");
                     btnDelete.setTextSize(12);
-                    btnDelete.setPadding(10, 0, 10, 0);
 
                     btnLayout.addView(btnEdit);
                     btnLayout.addView(btnDelete);
                     commentLayout.addView(btnLayout);
 
-                    // Edit button event
                     btnEdit.setOnClickListener(v -> showUpdateCommentDialog(commentId, comment));
 
-                    // delete button event
-                    btnDelete.setOnClickListener(v -> {
-                        boolean deleted = dbHelper.deleteComment(commentId);
-                        if (deleted) {
-                            Toast.makeText(this, "Comment deleted!", Toast.LENGTH_SHORT).show();
-                            loadComments();
-                        } else {
-                            Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    //  DELETE with confirmation
+                    btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog(
+                            "Do you want to delete this comment?",
+                            () -> {
+                                boolean deleted = dbHelper.deleteComment(commentId);
+                                if (deleted) {
+                                    Toast.makeText(this, "Comment deleted!", Toast.LENGTH_SHORT).show();
+                                    loadComments();
+                                } else {
+                                    Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    ));
                 }
 
                 commentContainer.addView(commentLayout);
@@ -377,7 +347,7 @@ public class HikeDetailActivity extends AppCompatActivity {
             commentContainer.addView(none);
         }
     }
-    // Display dialog to accept edit comment in detail page
+
     private void showUpdateCommentDialog(int commentId, String oldComment) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Update Comment");
@@ -415,7 +385,18 @@ public class HikeDetailActivity extends AppCompatActivity {
     }
 
 
-    // After update success in UpdateActivity, user will return to HikeDetail
+    private void showDeleteConfirmationDialog(String message, Runnable onConfirm) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Confirm Deletion");
+        builder.setMessage(message);
+        builder.setPositiveButton("Yes", (dialog, which) -> onConfirm.run());
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+            Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
+        });
+        builder.show();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

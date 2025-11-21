@@ -235,7 +235,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rows = db.delete(TABLE_HIKE, COL_HIKE_ID + "=?", new String[]{String.valueOf(id)});
         return rows > 0;
     }
-    // 🔍 Tìm kiếm hike theo tên, địa điểm, hoặc độ khó
+
     public Cursor searchHikes(String keyword) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -260,7 +260,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " AND " + COL_AUTHOR_ID + " = ? " +
                 " ORDER BY " + COL_DATE + " DESC";
 
-        // 🧩 Log truy vấn và tham số
+
         Log.d("DB_SEARCH_USER", "🔍 Query = " + query);
         Log.d("DB_SEARCH_USER", "🔍 Params = [" + likeKeyword + ", " + likeKeyword + ", " + likeKeyword + ", userId=" + userId + "]");
 
@@ -268,7 +268,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 likeKeyword, likeKeyword, likeKeyword, String.valueOf(userId)
         });
 
-        // 🧠 Log kết quả
+
         if (cursor != null) {
             Log.d("DB_SEARCH_USER", "✅ Rows found for userId=" + userId + " → " + cursor.getCount());
         } else {
@@ -344,7 +344,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rows = db.delete(TABLE_COMMENT, COL_COMMENT_ID + "=?", new String[]{String.valueOf(id)});
         return rows > 0;
     }
-    // 📝 Update comment
+    // Update comment
     public boolean updateComment(int id, String newContent, String newTimestamp) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();

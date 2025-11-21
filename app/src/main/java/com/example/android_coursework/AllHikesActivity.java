@@ -44,12 +44,12 @@ public class AllHikesActivity extends AppCompatActivity {
         adapter = new HikeAdapter(this, hikeList);
         allHikesRecycler.setAdapter(adapter);
 
-        // ✅ Get current userId
+        // Get current userId
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
         Log.d("AllHikesActivity", "👤 Current userId = " + userId);
 
-        // 🔍 UI mapping
+        // UI mapping
         EditText etSearch = findViewById(R.id.etSearch);
         Button btnSearch = findViewById(R.id.btnSearch);
         btnFilterLength = findViewById(R.id.btnFilterLength);
@@ -65,28 +65,41 @@ public class AllHikesActivity extends AppCompatActivity {
                 return;
             }
 
-            boolean deleted = dbHelper.deleteAllHikesByUser(userId);
-            if (deleted) {
-                Toast.makeText(this, "All hikes deleted!", Toast.LENGTH_SHORT).show();
-                loadAllHikes();
-            } else {
-                Toast.makeText(this, "No hikes found to delete.", Toast.LENGTH_SHORT).show();
-            }
+            // Toast confirm
+            new androidx.appcompat.app.AlertDialog.Builder(AllHikesActivity.this)
+                    .setTitle("Confirm Delete")
+                    .setMessage("Are you sure you want to delete all your hikes? This action cannot be undone.")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        boolean deleted = dbHelper.deleteAllHikesByUser(userId);
+                        if (deleted) {
+                            Toast.makeText(AllHikesActivity.this, "✅ All hikes deleted!", Toast.LENGTH_SHORT).show();
+                            loadAllHikes();
+                        } else {
+                            Toast.makeText(AllHikesActivity.this, "⚠️ No hikes found to delete.", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        dialog.dismiss();
+                        Toast.makeText(AllHikesActivity.this, "❎ Deletion cancelled.", Toast.LENGTH_SHORT).show();
+                    })
+                    .show();
         });
 
-        // 🔎 Search hikes (theo user)
+
+        // Search hikes (theo user)
         btnSearch.setOnClickListener(v -> {
             String keyword = etSearch.getText().toString().trim();
             if (keyword.isEmpty()) loadAllHikes();
             else searchHikes(keyword);
         });
 
-        // ⚙️ Filter buttons
+        // Filter buttons
         btnFilterLength.setOnClickListener(v -> toggleFilter("length"));
         btnFilterDate.setOnClickListener(v -> toggleFilter("date"));
         btnFilterParking.setOnClickListener(v -> toggleFilter("parking"));
 
-        // 💪 Spinner filter Difficulty (theo user)
+        // Spinner filter Difficulty (theo user)
         spFilterDifficulty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -101,7 +114,7 @@ public class AllHikesActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // 🔹 Load first
+        // Load first
         loadAllHikes();
     }
 
@@ -111,7 +124,7 @@ public class AllHikesActivity extends AppCompatActivity {
         loadAllHikes();
     }
 
-    // 🔍 Search hikes theo user
+    //Search hikes theo user
     private void searchHikes(String keyword) {
         hikeList.clear();
         Cursor cursor = dbHelper.searchHikesByUser(keyword, userId);
@@ -126,7 +139,7 @@ public class AllHikesActivity extends AppCompatActivity {
         Log.d("AllHikesActivity", "🔎 Found " + hikeList.size() + " hikes for userId=" + userId);
     }
 
-    // 📏 Sort
+    //  Sort
     private void sortHikesByLength() {
         Collections.sort(hikeList, Comparator.comparingDouble(HikeModel::getLength));
         adapter.notifyDataSetChanged();
@@ -137,7 +150,7 @@ public class AllHikesActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // 🚗 Filter Parking = Yes (theo user)
+    //  Filter Parking = Yes (theo user)
     private void filterByParking() {
         hikeList.clear();
         Cursor cursor = dbHelper.getHikesByUser(userId);
@@ -154,7 +167,7 @@ public class AllHikesActivity extends AppCompatActivity {
         Log.d("AllHikesActivity", "🚗 Filtered by parking (Yes): " + hikeList.size() + " hikes for userId=" + userId);
     }
 
-    // 💪 Filter by Difficulty (theo user)
+    //  Filter by Difficulty (theo user)
     private void filterBySingleDifficulty(String level) {
         hikeList.clear();
         Cursor cursor = dbHelper.getHikesByUser(userId);
@@ -171,7 +184,7 @@ public class AllHikesActivity extends AppCompatActivity {
         Log.d("AllHikesActivity", "💪 Filtered by difficulty (" + level + ") → " + hikeList.size());
     }
 
-    // 🧩 Load tất cả hikes của user
+    //  Load tất cả hikes của user
     private void loadAllHikes() {
         hikeList.clear();
         Cursor cursor = dbHelper.getHikesByUser(userId);
@@ -186,7 +199,7 @@ public class AllHikesActivity extends AppCompatActivity {
         Log.d("AllHikesActivity", "📍 Reloaded hikes for userId=" + userId + ": " + hikeList.size());
     }
 
-    // 🧱 Extract model
+    //  Extract model
     private HikeModel extractHikeFromCursor(Cursor cursor) {
         return new HikeModel(
                 cursor.getInt(cursor.getColumnIndexOrThrow("hike_id")),
@@ -203,7 +216,7 @@ public class AllHikesActivity extends AppCompatActivity {
         );
     }
 
-    // ⚙️ Toggle filter + highlight
+    //  Toggle filter + highlight
     private void toggleFilter(String type) {
         resetButtonStyle(btnFilterLength, android.R.color.holo_green_dark, false);
         resetButtonStyle(btnFilterDate, android.R.color.holo_orange_dark, false);
